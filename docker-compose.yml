@@ -1,0 +1,79 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: godashop_app
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    environment:
+      APP_URL: ${APP_URL:-http://localhost}
+      # Docker-only database connection. The app never uses XAMPP/localhost in this stack.
+      DB_HOST: db
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_NAME: godashop_recovered_20260919
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_USERNAME: ${SMTP_USERNAME:-your_email@example.com}
+      SMTP_SECRET: ${SMTP_SECRET:-change_me}
+      SHOP_OWNER: ${SHOP_OWNER:-your_email@example.com}
+      SHOP_ADDRESS: ${SHOP_ADDRESS:-Thành phố Hồ Chí Minh}
+      SCHOOL_MAP_QUERY: ${SCHOOL_MAP_QUERY:-Thành phố Hồ Chí Minh}
+      GOOGLE_RECAPTCHA_SITE: ${GOOGLE_RECAPTCHA_SITE:-replace_with_public_site_key}
+      GOOGLE_RECAPTCHA_SECRET: ${GOOGLE_RECAPTCHA_SECRET:-replace_with_secret_key}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-replace_with_google_client_id}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-replace_with_google_client_secret}
+      JWT_KEY: ${JWT_KEY:-change_this_jwt_key}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      APP_DEBUG: ${APP_DEBUG:-0}
+    volumes:
+      - ./upload:/var/www/html/upload
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+
+  db:
+    image: mysql:8.0
+    container_name: godashop_db
+    environment:
+      MYSQL_DATABASE: godashop_recovered_20260919
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      # Keep MariaDB files outside the source tree and outside Docker-managed storage.
+      # Override MYSQL_DATA_DIR in .env with an absolute Windows path if desired.
+      - ${MYSQL_DATA_DIR:-../godashop-db}:/var/lib/mysql
+      - ./migrations/godashop_recovered_20260919.sql:/docker-entrypoint-initdb.d/001-godashop.sql:ro
+      - ./migrations/20260920_articles_stripe.sql:/docker-entrypoint-initdb.d/002-migrations.sql:ro
+      - ./migrations/20260927_camera_catalog.sql:/docker-entrypoint-initdb.d/003-camera-catalog.sql:ro
+      - ./migrations/20260929_enhancements.sql:/docker-entrypoint-initdb.d/004-enhancements.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: godashop_phpmyadmin
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./docker-data/phpmyadmin:/sessions
+    ports:
+      - "0.0.0.0:8081:80"
+    restart: unless-stopped
