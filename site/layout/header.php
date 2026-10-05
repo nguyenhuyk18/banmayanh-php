@@ -69,7 +69,7 @@
                 <div class="col-md-6 hidden-sm hidden-xs top-message">
                     <span><i class="fas fa-camera"></i> Thiết bị chính hãng · Tư vấn bởi chuyên gia nhiếp ảnh</span>
                     <ul class="list-inline social-links">
-                        <li><a href="https://www.facebook.com/HocLapTrinhWebTaiNha.ThayLoc"><i
+                        <li><a href="https://www.facebook.com/hoaimeow.nhinhdep.103" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i
                                     class="fab fa-facebook-f"></i></a></li>
                         <li><a href="https://twitter.com"><i class="fab fa-twitter"></i></a></li>
                         <li><a href="https://www.instagram.com"><i class="fab fa-instagram"></i></a></li>

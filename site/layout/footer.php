@@ -11,7 +11,7 @@
                         </a>
                         <p>Nơi thiết bị và cảm hứng gặp nhau. Đồng hành cùng bạn trên mọi hành trình sáng tạo.</p>
                         <ul class="list-inline footer-social">
-                            <li><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a></li>
+                            <li><a href="https://www.facebook.com/hoaimeow.nhinhdep.103" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a></li>
                             <li><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>
                             <li><a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a></li>
                         </ul>
