@@ -135,7 +135,7 @@ function dispatch_action($controllerName, $action, array $allowed) {
         if (!in_array($action, ['logout','delete','deletes','deleteRole','confirm','active','disable'], true)) require_post();
         verify_csrf();
     }
-    $class = ucfirst($controllerName) . 'Controller';
+    $class = ($controllerName === 'shippingfee' ? 'ShippingFee' : ucfirst($controllerName)) . 'Controller';
     (new $class())->$action();
 }
 

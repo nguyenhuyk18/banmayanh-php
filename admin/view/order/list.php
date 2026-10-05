@@ -9,6 +9,14 @@
 			<li class="breadcrumb-item active">Đơn hàng</li>
 		</ol>
 		<!-- DataTables Example -->
+		<?php if (!empty($from) && !empty($to)): ?>
+		<div class="alert alert-info">
+			Đang hiển thị <?=count($orders)?> đơn từ <strong><?=h(formatVNDate($from))?></strong>
+			đến <strong><?=h(formatVNDate($to))?></strong>
+			<?= $report === 'cancelled' ? '(đã hủy)' : ($report === 'revenue' ? '(được tính vào doanh thu)' : '') ?>.
+			<a class="alert-link" href="index.php?c=order&amp;a=list">Xóa bộ lọc</a>
+		</div>
+		<?php endif; ?>
 		<div class="action-bar">
 			<input type="submit" class="btn btn-primary btn-sm" value="Thêm" name="add">
 			<input type="submit" class="btn btn-danger btn-sm" value="Xóa" name="delete">

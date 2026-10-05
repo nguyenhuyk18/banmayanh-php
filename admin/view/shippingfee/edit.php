@@ -20,7 +20,9 @@
     <div class="form-group">
       <label class="col-md-9 col-lg-6 control-label" for="price">Phí giao hàng</label>  
       <div class="col-md-9 col-lg-6"> 
-        <input name="price" id="price" type="text" value="<?=$transport->getPrice()?>" class="form-control">                        
+        <input name="price" id="price" type="number" min="0" max="100000000" step="1000" inputmode="numeric"
+          value="<?=h($transport->getPrice())?>" class="form-control" required>
+        <small class="form-text text-muted">Nhập số tiền bằng VNĐ, chỉ dùng chữ số. Ví dụ: 30000.</small>
       </div>
     </div>
     <div class="form-action">

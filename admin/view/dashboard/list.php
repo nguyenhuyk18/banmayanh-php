@@ -23,14 +23,14 @@
                 class="<?=$type=="thisyear" ? "active": ""?> btn btn-primary">Năm này</a>
             <div class="dropdown" style="display:inline-block">
                 <a class="<?=$type=="custom" ? "active" : ""?> btn btn-primary dropdown-toggle" href="#" role="button"
-                    id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
+                    id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tùy chọn</a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                     <div style="margin:20px">
                         <form action="index.php">
                             Từ ngày <input type="date" class="form-control" name="from_date" required
-                                value="<?=$type == "custom" ? $_GET["from_date"]: ""?>">
+                                value="<?=$type == "custom" ? h($from): ""?>">
                             Đến ngày <input type="date" class="form-control" name="to_date" required
-                                value="<?=$type == "custom" ? $_GET["to_date"]: ""?>">
+                                value="<?=$type == "custom" ? h($to): ""?>">
                             <br>
                             <input type="hidden" value="custom" name="type">
                             <input type="submit" value="Tìm" class="btn btn-primary form-control">
@@ -48,9 +48,9 @@
                         <div class="card-body-icon">
                             <i class="fas fa-fw fa-list"></i>
                         </div>
-                        <div class="mr-5"><?=count($orders)?> Đơn hàng</div>
+                        <div class="mr-5"><?=$order_count?> Đơn hàng</div>
                     </div>
-                    <a class="card-footer text-white clearfix small z-1" href="#">
+                    <a class="card-footer text-white clearfix small z-1" href="index.php?c=order&amp;a=list&amp;<?=h($range_query)?>">
                         <span class="float-left">Chi tiết</span>
                         <span class="float-right">
                             <i class="fas fa-angle-right"></i>
@@ -65,29 +65,9 @@
                             <i class="fas fa-fw fa-shopping-cart"></i>
                         </div>
 
-                        <?php 
-                  $revenue = 0;
-                  $cancel_number = 0;
-                  foreach ($orders as $order):
-                     if ($order->getStatusId() == 6) {
-                        $cancel_number++;
-                        continue;
-                     }
-                     if ($order->getPaymentMethod() == 2) {
-                        $payment = db_execute('SELECT status FROM stripe_payment WHERE order_id=?', [$order->getId()])->get_result()->fetch_assoc();
-                        if (!$payment || $payment['status'] !== 'paid') continue;
-                     }
-                     $orderItems = $order->getOrderItems();
-                     foreach($orderItems as $orderItem) {
-                        $revenue += $orderItem->getTotalPrice();
-                     }
-                     $revenue += $order->getShippingFee();
-                  endforeach
-                  ?>
-
                         <div class="mr-5">Doanh thu <?=number_format($revenue)?> đ</div>
                     </div>
-                    <a class="card-footer text-white clearfix small z-1" href="index.php?c=order&a=list">
+                    <a class="card-footer text-white clearfix small z-1" href="index.php?c=order&amp;a=list&amp;report=revenue&amp;<?=h($range_query)?>">
                         <span class="float-left">Chi tiết</span>
                         <span class="float-right">
                             <i class="fas fa-angle-right"></i>
@@ -103,7 +83,7 @@
                         </div>
                         <div class="mr-5"><?=$cancel_number?> đơn hàng bị hủy</div>
                     </div>
-                    <a class="card-footer text-white clearfix small z-1" href="#">
+                    <a class="card-footer text-white clearfix small z-1" href="index.php?c=order&amp;a=list&amp;report=cancelled&amp;<?=h($range_query)?>">
                         <span class="float-left">Chi tiết</span>
                         <span class="float-right">
                             <i class="fas fa-angle-right"></i>
@@ -113,7 +93,7 @@
             </div>
         </div>
         <!-- DataTables Example -->
-        <div class="card mb-3">
+        <div class="card mb-3" id="dashboard-orders">
             <div class="card-header">
                 <i class="fas fa-table"></i>
                 Đơn hàng

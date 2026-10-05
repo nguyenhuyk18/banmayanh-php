@@ -9,23 +9,32 @@ class ShippingFeeController {
 
 	function edit() {
 		$page_title = "Cập nhật phí giao hàng";
-		$id = $_GET["id"];
+		$id = positive_id($_GET["id"] ?? 0);
 		$transportRepository = new TransportRepository();
-		$transport = $transportRepository->find($id);
+		$transport = require_record($transportRepository->find($id));
 		include "view/shippingfee/edit.php";
 	}
 
 	function update() {
-		$id = $_POST["id"];
-		$price = $_POST["price"];
-		$transportRepository = new TransportRepository();
-		$transport = $transportRepository->find($id);
-		$transport->setPrice($price);
-		if ($transportRepository->update($transport)) {
-			header("location: index.php?c=shippingfee");
-			exit;
+		require_fields(["id", "price"]);
+		$id = positive_id($_POST["id"]);
+		$price = input_text("price");
+		if (!preg_match('/^[0-9]+$/D', $price)) {
+			throw new InvalidArgumentException('Phí giao hàng phải là số nguyên không âm.');
 		}
-
+		$price = (int) $price;
+		if ($price > 100000000) {
+			throw new InvalidArgumentException('Phí giao hàng không được vượt quá 100.000.000 đ.');
+		}
+		$transportRepository = new TransportRepository();
+		$transport = require_record($transportRepository->find($id));
+		$transport->setPrice($price);
+		if (!$transportRepository->update($transport)) {
+			throw new RuntimeException('Không thể cập nhật phí giao hàng.');
+		}
+		$_SESSION['message'] = 'Đã cập nhật phí giao hàng cho ' . $transport->getProvince()->getName() . '.';
+		header("Location: index.php?c=shippingfee");
+		exit;
 	}
 
 	

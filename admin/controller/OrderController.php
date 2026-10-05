@@ -3,7 +3,29 @@ class OrderController {
 	function list() {
 		$page_title = "Danh sách đơn hàng";
 		$orderRepository = new OrderRepository();
-		$orders = $orderRepository->getAll();
+		$from = input_text('from_date', $_GET);
+		$to = input_text('to_date', $_GET);
+		$report = input_text('report', $_GET, 'all');
+		if (!in_array($report, ['all', 'revenue', 'cancelled'], true)) throw new InvalidArgumentException('Bộ lọc đơn hàng không hợp lệ.');
+		$conds = [];
+		if ($from !== '' || $to !== '') {
+			if ($from === '' || $to === '') throw new InvalidArgumentException('Vui lòng chọn đầy đủ khoảng thời gian.');
+			foreach ([$from, $to] as $date) {
+				if (!preg_match('/^\d{4}-\d{2}-\d{2}$/D', $date) || date('Y-m-d', strtotime($date)) !== $date) throw new InvalidArgumentException('Ngày báo cáo không hợp lệ.');
+			}
+			if ($from > $to) throw new InvalidArgumentException('Ngày bắt đầu không được lớn hơn ngày kết thúc.');
+			$conds['created_date'] = ['type' => 'BETWEEN', 'val' => "'{$from} 00:00:00' AND '{$to} 23:59:59'"];
+		}
+		if ($report === 'cancelled') $conds['order_status_id'] = ['type' => '=', 'val' => 6];
+		$orders = $orderRepository->getBy($conds, ['created_date' => 'DESC']);
+		if ($report === 'revenue') {
+			$orders = array_values(array_filter($orders, function ($order) {
+				if ($order->getStatusId() == 6) return false;
+				if ($order->getPaymentMethod() != 2) return true;
+				$payment = db_execute('SELECT status FROM stripe_payment WHERE order_id=?', [$order->getId()])->get_result()->fetch_assoc();
+				return $payment && $payment['status'] === 'paid';
+			}));
+		}
 		include "view/order/list.php";
 	}
 
